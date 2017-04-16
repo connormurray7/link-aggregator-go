@@ -1,0 +1,32 @@
+<style>
+    html {
+        height: 100%;
+    }
+    p {
+        color: black;
+        font-family: 'serif';
+        font-size: 200%;
+    }
+    input {
+        font-size: 40px; // for say a select
+        width: 200px;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        color: black;
+        outline: none;
+    }
+    form {
+        padding-bottom: 30px;
+    }
+    table {
+        float: left;
+        border: none;
+    }
+    th,
+    td {
+    }
+    th {
+        font-weight: bold
+    }
+</style>
