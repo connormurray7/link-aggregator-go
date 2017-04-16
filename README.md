@@ -1,1 +1,2 @@
-# link-aggregator-go
+# Link Aggregator in Go
+This is a Golang implementation of [Link Aggregator](https://github.com/connormurray7/link-aggregator) that is available here [http://link-aggregator.top/](http://link-aggregator.top/).
