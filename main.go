@@ -15,5 +15,6 @@ func main() {
 	addr := viper.GetString("address")
 	port := viper.GetString("port")
 
-	fmt.Printf("This is the addr %s and port %s", addr, port)
+	fmt.Printf("This is the addr %s and port %s\n", addr, port)
+
 }
