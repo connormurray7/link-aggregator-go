@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
+
+	"net/http"
 
 	"github.com/spf13/viper"
 )
@@ -15,6 +18,11 @@ func main() {
 	addr := viper.GetString("address")
 	port := viper.GetString("port")
 
-	fmt.Printf("This is the addr %s and port %s\n", addr, port)
+	log.Printf("This is the addr %s and port %s\n", addr, port)
 
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/", fs)
+
+	log.Println("Starting server...")
+	http.ListenAndServe(":"+port, nil)
 }
