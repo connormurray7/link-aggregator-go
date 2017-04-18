@@ -16,7 +16,7 @@ func main() {
 		panic(fmt.Errorf("Fatal error config file: %s ", err))
 	}
 	addr := viper.GetString("address")
-	port := viper.GetString("port")
+	port := ":" + viper.GetString("port")
 
 	log.Printf("This is the addr %s and port %s\n", addr, port)
 
@@ -24,5 +24,5 @@ func main() {
 	http.Handle("/", fs)
 
 	log.Println("Starting server...")
-	http.ListenAndServe(":"+port, nil)
+	http.ListenAndServe(port, nil)
 }
