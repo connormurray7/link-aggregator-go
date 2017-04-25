@@ -11,18 +11,18 @@ type Cacher interface {
 	Set(key string, val string)
 }
 
-type LinkAggCache struct {
+type Cache struct {
 	redisConn redis.Conn
 }
 
-func NewLinkAggCache(config viper.Viper) *LinkAggCache {
-	var c LinkAggCache
+func NewLinkAggCache(config viper.Viper) *Cache {
+	var c Cache
 	var conn, _ = redis.Dial("tcp", config.GetString("redis.port"))
 	c.redisConn = conn
 	return &c
 }
 
-func (cache *LinkAggCache) Get(key string) string {
+func (cache *Cache) Get(key string) string {
 	cache.redisConn.Send("GET", key)
 	val, _ := cache.redisConn.Receive()
 	if str, ok := val.(string); ok {
@@ -31,7 +31,7 @@ func (cache *LinkAggCache) Get(key string) string {
 	return ""
 }
 
-func (cache *LinkAggCache) Set(key string, val string) {
+func (cache *Cache) Set(key string, val string) {
 	cache.redisConn.Send("SET", key, val)
 	cache.redisConn.Flush()
 }
