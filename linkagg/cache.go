@@ -11,10 +11,12 @@ type Cacher interface {
 	Set(key string, val string)
 }
 
+//Cache holds the redis information and implements Cacher interface.
 type Cache struct {
 	redisConn redis.Conn
 }
 
+//NewLinkAggCache generates a new cache.
 func NewLinkAggCache(config viper.Viper) *Cache {
 	var c Cache
 	var conn, _ = redis.Dial("tcp", config.GetString("redis.port"))
@@ -22,6 +24,7 @@ func NewLinkAggCache(config viper.Viper) *Cache {
 	return &c
 }
 
+//Get fetches entry from Redis instance if it exists, else returns "".
 func (cache *Cache) Get(key string) string {
 	cache.redisConn.Send("GET", key)
 	val, _ := cache.redisConn.Receive()
@@ -31,6 +34,7 @@ func (cache *Cache) Get(key string) string {
 	return ""
 }
 
+//Set saves to cache and overwrites any previous value.
 func (cache *Cache) Set(key string, val string) {
 	cache.redisConn.Send("SET", key, val)
 	cache.redisConn.Flush()
