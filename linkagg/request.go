@@ -1,12 +1,17 @@
 package linkagg
 
+import (
+	"github.com/spf13/viper"
+)
+
 //Requester makes a request to the outside APIs
 type Requester interface {
 	Request(req string) string
 }
 
 type LinkAgg struct {
-	cache Cache
+	cache  *Cache
+	config *viper.Viper
 }
 
 func (linkAgg *LinkAgg) Request(req string) string {
