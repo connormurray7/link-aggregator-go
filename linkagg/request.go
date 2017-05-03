@@ -30,9 +30,9 @@ func (linkAgg *LinkAgg) Request(req string) string {
 }
 
 func (linkAgg *LinkAgg) fetchExternalRequest(query string) string {
-	hnRequest := linkAgg.makeHackerNewsRequest()
-	soRequest := linkAgg.createStackOverflowRequest()
-	ghRequest := linkAgg.createGithubRequest()
+	hnRequest := linkAgg.makeHackerNewsRequest(query)
+	soRequest := linkAgg.makeStackOverflowRequest(query)
+	ghRequest := linkAgg.makeGithubRequest(query)
 }
 
 func (linkAgg *LinkAgg) makeHackerNewsRequest(query string) string {
@@ -44,14 +44,25 @@ func (linkAgg *LinkAgg) makeHackerNewsRequest(query string) string {
 	q := req.URL.Query()
 	q.Set("query", query)
 	q.Set("tags", "story")
-	q.Set("hitsPerPage", 15)
+	q.Set("hitsPerPage", "15")
 
 }
 
-func (linkAgg *LinkAgg) createStackOverflowRequest() string {
+func (linkAgg *LinkAgg) makeStackOverflowRequest(query string) string {
+	req, err := http.NewRequest("GET", linkAgg.config.GetString("StackOverflow.url"), nil)
+	if err != nil {
+		log.Print(err)
+		return ""
+	}
+	q := req.URL.Query()
+	q.Set("query", query)
+	q.Set("order", "desc")
+	q.Set("accepted", "True")
+	q.Set("site", "stackoverflow")
+	q.Set("pagesize", "15")
 
 }
 
-func (linkAgg *LinkAgg) createGithubRequest() string {
+func (linkAgg *LinkAgg) makeGithubRequest(query string) string {
 
 }
