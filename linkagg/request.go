@@ -1,6 +1,9 @@
 package linkagg
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/spf13/viper"
 )
 
@@ -27,19 +30,28 @@ func (linkAgg *LinkAgg) Request(req string) string {
 }
 
 func (linkAgg *LinkAgg) fetchExternalRequest(query string) string {
-	hnRequest := createHackerNewsRequest()
-	soRequest := createStackOverflowRequest()
-	ghRequest := createGithubRequest()
+	hnRequest := linkAgg.makeHackerNewsRequest()
+	soRequest := linkAgg.createStackOverflowRequest()
+	ghRequest := linkAgg.createGithubRequest()
 }
 
-func createHackerNewsRequest() string {
+func (linkAgg *LinkAgg) makeHackerNewsRequest(query string) string {
+	req, err := http.NewRequest("GET", linkAgg.config.GetString("HackerNews.url"), nil)
+	if err != nil {
+		log.Print(err)
+		return ""
+	}
+	q := req.URL.Query()
+	q.Set("query", query)
+	q.Set("tags", "story")
+	q.Set("hitsPerPage", 15)
 
 }
 
-func createStackOverflowRequest() string {
+func (linkAgg *LinkAgg) createStackOverflowRequest() string {
 
 }
 
-func createGithubRequest() string {
+func (linkAgg *LinkAgg) createGithubRequest() string {
 
 }
