@@ -11,6 +11,7 @@ import (
 
 func main() {
 	viper := viper.New()
+	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil {             // Handle errors reading the config file
