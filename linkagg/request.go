@@ -64,5 +64,13 @@ func (linkAgg *LinkAgg) makeStackOverflowRequest(query string) string {
 }
 
 func (linkAgg *LinkAgg) makeGithubRequest(query string) string {
-
+	req, err := http.NewRequest("GET", linkAgg.config.GetString("Github.url"), nil)
+	if err != nil {
+		log.Print(err)
+		return ""
+	}
+	q := req.URL.Query()
+	q.Set("query", query)
+	q.Set("sort", "stars")
+	q.Set("per_page", "15")
 }
