@@ -17,7 +17,7 @@ type Cache struct {
 }
 
 //NewLinkAggCache generates a new cache.
-func NewLinkAggCache(config viper.Viper) *Cache {
+func NewLinkAggCache(config *viper.Viper) *Cache {
 	var c Cache
 	var conn, _ = redis.Dial("tcp", config.GetString("redis.port"))
 	c.redisConn = conn

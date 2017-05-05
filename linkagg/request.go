@@ -3,6 +3,7 @@ package linkagg
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -16,6 +17,18 @@ type Requester interface {
 type LinkAgg struct {
 	cache  *Cache
 	config *viper.Viper
+	client *http.Client
+}
+
+func NewLinkAgg(config *viper.Viper) LinkAgg {
+	var linkAgg LinkAgg
+
+	linkAgg.config = config
+	linkAgg.cache = NewLinkAggCache(config)
+	linkAgg.client = &http.Client{
+		Timeout: time.Second * 10,
+	}
+	return linkAgg
 }
 
 //Request fetches all of the information from external APIs if not cached.
