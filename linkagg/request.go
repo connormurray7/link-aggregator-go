@@ -1,6 +1,7 @@
 package linkagg
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -94,12 +95,21 @@ func (linkAgg *LinkAgg) makeGithubRequest(query string) string {
 	return linkAgg.makeRequest(req)
 }
 
-func (linkAgg *LinkAgg) makeRequest(req *http.Request) string {
+func (linkAgg *LinkAgg) makeRequest(req *http.Request) map[string]interface{} {
 	resp, err := linkAgg.client.Do(req)
 	if err != nil {
 		log.Print("Unable to complete request", err)
-		return ""
+		return nil
 	}
 	byteArr, err := ioutil.ReadAll(resp.Body)
-	return string(byteArr)
+
+	var f interface{}
+	err := json.Unmarshal(byteArr, &f)
+
+	if err != nil {
+		log.Printf("Unable to unmarshal json response for request %s", string(byteArr))
+		log.Print(err)
+		return nil
+	}
+	return f.(map[string]interface{})
 }
