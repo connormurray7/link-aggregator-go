@@ -1,6 +1,7 @@
 package linkagg
 
 import (
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -20,6 +21,7 @@ type LinkAgg struct {
 	client *http.Client
 }
 
+//NewLinkAgg constructs a link agg given a config file.
 func NewLinkAgg(config *viper.Viper) LinkAgg {
 	var linkAgg LinkAgg
 
@@ -59,6 +61,7 @@ func (linkAgg *LinkAgg) makeHackerNewsRequest(query string) string {
 	q.Set("tags", "story")
 	q.Set("hitsPerPage", "15")
 
+	return linkAgg.makeRequest(req)
 }
 
 func (linkAgg *LinkAgg) makeStackOverflowRequest(query string) string {
@@ -74,6 +77,7 @@ func (linkAgg *LinkAgg) makeStackOverflowRequest(query string) string {
 	q.Set("site", "stackoverflow")
 	q.Set("pagesize", "15")
 
+	return linkAgg.makeRequest(req)
 }
 
 func (linkAgg *LinkAgg) makeGithubRequest(query string) string {
@@ -86,4 +90,16 @@ func (linkAgg *LinkAgg) makeGithubRequest(query string) string {
 	q.Set("query", query)
 	q.Set("sort", "stars")
 	q.Set("per_page", "15")
+
+	return linkAgg.makeRequest(req)
+}
+
+func (linkAgg *LinkAgg) makeRequest(req *http.Request) string {
+	resp, err := linkAgg.client.Do(req)
+	if err != nil {
+		log.Print("Unable to complete request", err)
+		return ""
+	}
+	byteArr, err := ioutil.ReadAll(resp.Body)
+	return string(byteArr)
 }
