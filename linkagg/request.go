@@ -102,14 +102,18 @@ func (linkAgg *LinkAgg) makeRequest(req *http.Request) map[string]interface{} {
 		return nil
 	}
 	byteArr, err := ioutil.ReadAll(resp.Body)
-
-	var f interface{}
-	err := json.Unmarshal(byteArr, &f)
-
 	if err != nil {
+		log.Print("Unable to read all bytes in response", resp, err)
+		return nil
+	}
+
+	var jsonResp interface{}
+	jsonErr := json.Unmarshal(byteArr, &jsonResp)
+
+	if jsonErr != nil {
 		log.Printf("Unable to unmarshal json response for request %s", string(byteArr))
 		log.Print(err)
 		return nil
 	}
-	return f.(map[string]interface{})
+	return jsonResp.(map[string]interface{})
 }
