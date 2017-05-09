@@ -72,7 +72,7 @@ func (linkAgg *LinkAgg) makeHackerNewsRequest(query string) string {
 	return ""
 }
 
-func (linkAgg *LinkAgg) makeStackOverflowRequest(query string) string {
+func (linkAgg *LinkAgg) makeStackOverflowRequest(query string) []LinkAggMessage {
 	req, err := http.NewRequest("GET", linkAgg.config.GetString("StackOverflow.url"), nil)
 	if err != nil {
 		log.Print(err)
@@ -85,21 +85,15 @@ func (linkAgg *LinkAgg) makeStackOverflowRequest(query string) string {
 	q.Set("site", "stackoverflow")
 	q.Set("pagesize", "15")
 
-	resp := linkAgg.makeRequest(req)
-	parsed := []LinkAggMessage{}
-
-	for hit := range resp["items"] {
-		log.Print(hit["title"], hit["link"])
-	}
-
-	return ""
+	json := linkAgg.makeRequest(req)
+	return parseJSONResponse(json, "items", "title", "link")
 }
 
 func (linkAgg *LinkAgg) makeGithubRequest(query string) []LinkAggMessage {
 	req, err := http.NewRequest("GET", linkAgg.config.GetString("Github.url"), nil)
 	if err != nil {
 		log.Print(err)
-		return ""
+		return nil
 	}
 	q := req.URL.Query()
 	q.Set("query", query)
@@ -107,17 +101,7 @@ func (linkAgg *LinkAgg) makeGithubRequest(query string) []LinkAggMessage {
 	q.Set("per_page", "15")
 
 	json := linkAgg.makeRequest(req)
-	result := gjson.Get(json, "items")
-	parsed := make([]LinkAggMessage, 20)
-	num := 0
-
-	for _, hit := range result.Array() {
-		record := hit.Map()
-		log.Print(record["title"], record["link"])
-		parsed[num] = LinkAggMessage{record["title"].String(), record["link"].String()}
-		num++
-	}
-	return parsed[:num]
+	return parseJSONResponse(json, "items", "name", "html_url")
 }
 
 func (linkAgg *LinkAgg) makeRequest(req *http.Request) string {
@@ -133,4 +117,17 @@ func (linkAgg *LinkAgg) makeRequest(req *http.Request) string {
 	}
 
 	return string(byteArr[:])
+}
+
+func parseJSONResponse(json string, items string, title string, url string) []LinkAggMessage {
+	result := gjson.Get(json, items)
+	parsed := make([]LinkAggMessage, 20)
+	num := 0
+
+	for _, hit := range result.Array() {
+		record := hit.Map()
+		parsed[num] = LinkAggMessage{record[title].String(), record[url].String()}
+		num++
+	}
+	return parsed[:num]
 }
