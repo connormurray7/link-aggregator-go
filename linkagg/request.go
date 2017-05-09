@@ -1,6 +1,7 @@
 package linkagg
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -51,9 +52,15 @@ func (linkAgg *LinkAgg) Request(req string) string {
 }
 
 func (linkAgg *LinkAgg) fetchExternalRequest(query string) string {
-	hnRequest := linkAgg.makeHackerNewsRequest(query)
-	soRequest := linkAgg.makeStackOverflowRequest(query)
-	ghRequest := linkAgg.makeGithubRequest(query)
+	m := make(map[string][]LinkAggMessage)
+	m["Github"] = linkAgg.makeGithubRequest(query)
+	m["Hacker News"] = linkAgg.makeHackerNewsRequest(query)
+	m["Stack Overflow"] = linkAgg.makeStackOverflowRequest(query)
+	result, err := json.Marshal(m)
+	if err != nil {
+		log.Print("Unable to encode response", err)
+	}
+	return string(result)
 }
 
 func (linkAgg *LinkAgg) makeHackerNewsRequest(query string) []LinkAggMessage {
