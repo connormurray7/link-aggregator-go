@@ -1,13 +1,13 @@
 package linkagg
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/spf13/viper"
+	"github.com/tidwall/gjson"
 )
 
 //Requester makes a request to the outside APIs
@@ -20,6 +20,11 @@ type LinkAgg struct {
 	cache  *Cache
 	config *viper.Viper
 	client *http.Client
+}
+
+type LinkAggMessage struct {
+	title string
+	link  string
 }
 
 //NewLinkAgg constructs a link agg given a config file.
@@ -62,7 +67,9 @@ func (linkAgg *LinkAgg) makeHackerNewsRequest(query string) string {
 	q.Set("tags", "story")
 	q.Set("hitsPerPage", "15")
 
-	return linkAgg.makeRequest(req)
+	resp := linkAgg.makeRequest(req)
+
+	return ""
 }
 
 func (linkAgg *LinkAgg) makeStackOverflowRequest(query string) string {
@@ -78,10 +85,17 @@ func (linkAgg *LinkAgg) makeStackOverflowRequest(query string) string {
 	q.Set("site", "stackoverflow")
 	q.Set("pagesize", "15")
 
-	return linkAgg.makeRequest(req)
+	resp := linkAgg.makeRequest(req)
+	parsed := []LinkAggMessage{}
+
+	for hit := range resp["items"] {
+		log.Print(hit["title"], hit["link"])
+	}
+
+	return ""
 }
 
-func (linkAgg *LinkAgg) makeGithubRequest(query string) string {
+func (linkAgg *LinkAgg) makeGithubRequest(query string) []LinkAggMessage {
 	req, err := http.NewRequest("GET", linkAgg.config.GetString("Github.url"), nil)
 	if err != nil {
 		log.Print(err)
@@ -92,28 +106,31 @@ func (linkAgg *LinkAgg) makeGithubRequest(query string) string {
 	q.Set("sort", "stars")
 	q.Set("per_page", "15")
 
-	return linkAgg.makeRequest(req)
+	json := linkAgg.makeRequest(req)
+	result := gjson.Get(json, "items")
+	parsed := make([]LinkAggMessage, 20)
+	num := 0
+
+	for _, hit := range result.Array() {
+		record := hit.Map()
+		log.Print(record["title"], record["link"])
+		parsed[num] = LinkAggMessage{record["title"].String(), record["link"].String()}
+		num++
+	}
+	return parsed[:num]
 }
 
-func (linkAgg *LinkAgg) makeRequest(req *http.Request) map[string]interface{} {
+func (linkAgg *LinkAgg) makeRequest(req *http.Request) string {
 	resp, err := linkAgg.client.Do(req)
 	if err != nil {
 		log.Print("Unable to complete request", err)
-		return nil
+		return ""
 	}
 	byteArr, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Print("Unable to read all bytes in response", resp, err)
-		return nil
+		return ""
 	}
 
-	var jsonResp interface{}
-	jsonErr := json.Unmarshal(byteArr, &jsonResp)
-
-	if jsonErr != nil {
-		log.Printf("Unable to unmarshal json response for request %s", string(byteArr))
-		log.Print(err)
-		return nil
-	}
-	return jsonResp.(map[string]interface{})
+	return string(byteArr[:])
 }
