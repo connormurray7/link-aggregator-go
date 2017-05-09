@@ -56,27 +56,26 @@ func (linkAgg *LinkAgg) fetchExternalRequest(query string) string {
 	ghRequest := linkAgg.makeGithubRequest(query)
 }
 
-func (linkAgg *LinkAgg) makeHackerNewsRequest(query string) string {
+func (linkAgg *LinkAgg) makeHackerNewsRequest(query string) []LinkAggMessage {
 	req, err := http.NewRequest("GET", linkAgg.config.GetString("HackerNews.url"), nil)
 	if err != nil {
 		log.Print(err)
-		return ""
+		return nil
 	}
 	q := req.URL.Query()
 	q.Set("query", query)
 	q.Set("tags", "story")
 	q.Set("hitsPerPage", "15")
 
-	resp := linkAgg.makeRequest(req)
-
-	return ""
+	json := linkAgg.makeRequest(req)
+	return parseJSONResponse(json, "hits", "title", "url")
 }
 
 func (linkAgg *LinkAgg) makeStackOverflowRequest(query string) []LinkAggMessage {
 	req, err := http.NewRequest("GET", linkAgg.config.GetString("StackOverflow.url"), nil)
 	if err != nil {
 		log.Print(err)
-		return ""
+		return nil
 	}
 	q := req.URL.Query()
 	q.Set("query", query)
