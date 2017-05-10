@@ -1,6 +1,7 @@
 package linkagg
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -12,8 +13,8 @@ import (
 )
 
 //Requester makes a request to the outside APIs
-type Requester interface {
-	Request(req string) string
+type Handler interface {
+	Handle(w http.ResponseWriter, r *http.Request)
 }
 
 //LinkAgg implements the requester interface and calls out to external APIs.
@@ -40,15 +41,17 @@ func NewLinkAgg(config *viper.Viper) LinkAgg {
 	return linkAgg
 }
 
-//Request fetches all of the information from external APIs if not cached.
-func (linkAgg *LinkAgg) Request(req string) string {
+//Handle fetches all of the information from external APIs if not cached.
+func (linkAgg *LinkAgg) Handle(w http.ResponseWriter, r *http.Request) {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r.Body)
+	req := buf.String()
 	result := linkAgg.cache.Get(req)
-	if result != "" {
-		return result
+	if result == "" {
+		resp := linkAgg.fetchExternalRequest(req)
+		linkAgg.cache.Set(req, resp)
+		w.Write([]byte(resp))
 	}
-	resp := linkAgg.fetchExternalRequest(req)
-	linkAgg.cache.Set(req, resp)
-	return resp
 }
 
 func (linkAgg *LinkAgg) fetchExternalRequest(query string) string {

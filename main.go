@@ -6,6 +6,7 @@ import (
 
 	"net/http"
 
+	"github.com/connormurray7/link-aggregator-go/linkagg"
 	"github.com/spf13/viper"
 )
 
@@ -17,6 +18,10 @@ func main() {
 	if err != nil {             // Handle errors reading the config file
 		panic(fmt.Errorf("Fatal error config file: %s ", err))
 	}
+
+	l := linkagg.NewLinkAgg(viper)
+	http.HandleFunc("/search", l.Handle)
+
 	addr := viper.GetString("address")
 	port := ":" + viper.GetString("port")
 
