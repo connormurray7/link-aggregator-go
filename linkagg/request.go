@@ -12,7 +12,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-//Requester makes a request to the outside APIs
+//Handler makes a request to the outside APIs
 type Handler interface {
 	Handle(w http.ResponseWriter, r *http.Request)
 }
