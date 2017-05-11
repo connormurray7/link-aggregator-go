@@ -24,7 +24,8 @@ type LinkAgg struct {
 	client *http.Client
 }
 
-type LinkAggMessage struct {
+//Message contains the information for every row in a response.
+type Message struct {
 	title string
 	link  string
 }
@@ -55,7 +56,7 @@ func (linkAgg *LinkAgg) Handle(w http.ResponseWriter, r *http.Request) {
 }
 
 func (linkAgg *LinkAgg) fetchExternalRequest(query string) string {
-	m := make(map[string][]LinkAggMessage)
+	m := make(map[string][]Message)
 	m["Github"] = linkAgg.makeGithubRequest(query)
 	m["Hacker News"] = linkAgg.makeHackerNewsRequest(query)
 	m["Stack Overflow"] = linkAgg.makeStackOverflowRequest(query)
@@ -66,7 +67,7 @@ func (linkAgg *LinkAgg) fetchExternalRequest(query string) string {
 	return string(result)
 }
 
-func (linkAgg *LinkAgg) makeHackerNewsRequest(query string) []LinkAggMessage {
+func (linkAgg *LinkAgg) makeHackerNewsRequest(query string) []Message {
 	req, err := http.NewRequest("GET", linkAgg.config.GetString("HackerNews.url"), nil)
 	if err != nil {
 		log.Print(err)
@@ -81,7 +82,7 @@ func (linkAgg *LinkAgg) makeHackerNewsRequest(query string) []LinkAggMessage {
 	return parseJSONResponse(json, "hits", "title", "url")
 }
 
-func (linkAgg *LinkAgg) makeStackOverflowRequest(query string) []LinkAggMessage {
+func (linkAgg *LinkAgg) makeStackOverflowRequest(query string) []Message {
 	req, err := http.NewRequest("GET", linkAgg.config.GetString("StackOverflow.url"), nil)
 	if err != nil {
 		log.Print(err)
@@ -98,7 +99,7 @@ func (linkAgg *LinkAgg) makeStackOverflowRequest(query string) []LinkAggMessage 
 	return parseJSONResponse(json, "items", "title", "link")
 }
 
-func (linkAgg *LinkAgg) makeGithubRequest(query string) []LinkAggMessage {
+func (linkAgg *LinkAgg) makeGithubRequest(query string) []Message {
 	req, err := http.NewRequest("GET", linkAgg.config.GetString("Github.url"), nil)
 	if err != nil {
 		log.Print(err)
@@ -128,14 +129,14 @@ func (linkAgg *LinkAgg) makeRequest(req *http.Request) string {
 	return string(byteArr[:])
 }
 
-func parseJSONResponse(json string, items string, title string, url string) []LinkAggMessage {
+func parseJSONResponse(json string, items string, title string, url string) []Message {
 	result := gjson.Get(json, items)
-	parsed := make([]LinkAggMessage, 20)
+	parsed := make([]Message, 20)
 	num := 0
 
 	for _, hit := range result.Array() {
 		record := hit.Map()
-		parsed[num] = LinkAggMessage{record[title].String(), record[url].String()}
+		parsed[num] = Message{record[title].String(), record[url].String()}
 		num++
 	}
 	return parsed[:num]
