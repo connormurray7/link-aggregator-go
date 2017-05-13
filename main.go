@@ -19,7 +19,7 @@ func main() {
 		panic(fmt.Errorf("Fatal error config file: %s ", err))
 	}
 
-	l := linkagg.NewLinkAgg(viper)
+	l := linkagg.NewServer(viper)
 	http.HandleFunc("/search", l.Handle)
 
 	addr := viper.GetString("address")
