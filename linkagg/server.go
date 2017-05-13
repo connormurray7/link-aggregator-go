@@ -39,7 +39,7 @@ func (server *Server) Handle(w http.ResponseWriter, r *http.Request) {
 	req := buf.String()
 	result := server.cache.Get(req)
 	if result == "" {
-		resp := linkAgg.fetchExternalRequest(req)
+		resp := FetchExternalRequest(req, server.config, server.client)
 		server.cache.Set(req, resp)
 		w.Write([]byte(resp))
 	}

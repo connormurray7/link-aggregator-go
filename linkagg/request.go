@@ -16,6 +16,7 @@ type Message struct {
 	link  string
 }
 
+//FetchExternalRequest calls all external apis and returns a json string of parsed responses.
 func FetchExternalRequest(query string, config *viper.Viper, client *http.Client) string {
 	m := make(map[string][]Message)
 	m["Github"] = makeGithubRequest(query, config, client)
