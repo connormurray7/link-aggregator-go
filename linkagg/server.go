@@ -2,6 +2,7 @@ package linkagg
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -34,6 +35,7 @@ func NewServer(config *viper.Viper) Server {
 
 //Handle fetches all of the information from external APIs if not cached.
 func (server *Server) Handle(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Received request")
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
 	req := buf.String()

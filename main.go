@@ -27,7 +27,7 @@ func main() {
 
 	log.Printf("This is the addr %s and port %s\n", addr, port)
 
-	fs := http.FileServer(http.Dir("static"))
+	fs := http.FileServer(http.Dir("run-locally"))
 	http.Handle("/", fs)
 
 	log.Println("Starting server...")
