@@ -1,10 +1,13 @@
 package linkagg
 
 import (
-	"bytes"
 	"fmt"
 	"net/http"
 	"time"
+
+	"io/ioutil"
+
+	"log"
 
 	"github.com/spf13/viper"
 )
@@ -36,9 +39,12 @@ func NewServer(config *viper.Viper) Server {
 //Handle fetches all of the information from external APIs if not cached.
 func (server *Server) Handle(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Received request")
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(r.Body)
-	req := buf.String()
+	defer r.Body.Close()
+	arr, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println("Unable to parse request.", r)
+	}
+	req := string(arr)
 	result := server.cache.Get(req)
 	if result == "" {
 		resp := FetchExternalRequest(req, server.config, server.client)
