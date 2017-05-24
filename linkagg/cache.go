@@ -1,6 +1,8 @@
 package linkagg
 
 import (
+	"log"
+
 	"github.com/garyburd/redigo/redis"
 	"github.com/spf13/viper"
 )
@@ -19,6 +21,7 @@ type Cache struct {
 //NewLinkAggCache generates a new cache.
 func NewLinkAggCache(config *viper.Viper) *Cache {
 	var c Cache
+	log.Println("Connecting to Redis instance on local port,", config.GetString("Redis.port"))
 	var conn, _ = redis.Dial("tcp", ":"+config.GetString("Redis.port"))
 	c.redisConn = conn
 	return &c
