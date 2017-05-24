@@ -40,7 +40,7 @@ func NewServer(config *viper.Viper) Server {
 }
 
 //Handle fetches all of the information from external APIs if not cached.
-func (server *Server) Handle(w http.ResponseWriter, r *http.Request) {
+func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	arr, err := ioutil.ReadAll(r.Body)
 	if err != nil {

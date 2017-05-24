@@ -20,7 +20,7 @@ func main() {
 	}
 
 	l := linkagg.NewServer(viper)
-	http.HandleFunc("/search", l.Handle)
+	http.Handle("/search", l)
 
 	addr := viper.GetString("address")
 	port := ":" + viper.GetString("port")
