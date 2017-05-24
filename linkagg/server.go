@@ -50,10 +50,12 @@ func (server *Server) Handle(w http.ResponseWriter, r *http.Request) {
 	log.Println("Inbound request", req)
 	result := server.cache.Get(req)
 	if result == "" && !server.needRateLimit() {
-		resp := FetchExternalRequest(req, server.config, server.client)
-		server.cache.Set(req, resp)
-		w.Write([]byte(resp))
+		log.Print("Request not cached, fetching from external APIs")
+		result := FetchExternalRequest(req, server.config, server.client)
+		server.cache.Set(req, result)
 	}
+	log.Println("Sending back", result)
+	w.Write([]byte(result))
 }
 
 func (server *Server) needRateLimit() bool {
