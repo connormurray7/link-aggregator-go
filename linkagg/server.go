@@ -1,7 +1,6 @@
 package linkagg
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -42,13 +41,13 @@ func NewServer(config *viper.Viper) Server {
 
 //Handle fetches all of the information from external APIs if not cached.
 func (server *Server) Handle(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Received request")
 	defer r.Body.Close()
 	arr, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println("Unable to parse request.", r)
 	}
 	req := string(arr)
+	log.Println("Inbound request", req)
 	result := server.cache.Get(req)
 	if result == "" && !server.needRateLimit() {
 		resp := FetchExternalRequest(req, server.config, server.client)
