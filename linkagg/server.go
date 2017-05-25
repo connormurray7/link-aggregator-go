@@ -21,7 +21,7 @@ type Server struct {
 }
 
 //NewServer constructs a new link agg server given a config file.
-func NewServer(config *viper.Viper) Server {
+func NewServer(config *viper.Viper) *Server {
 	var server Server
 
 	server.config = config
@@ -31,7 +31,7 @@ func NewServer(config *viper.Viper) Server {
 	}
 	server.maxReqPerSec = config.GetInt("ratelimit")
 	server.reqTimes = make(chan int64, server.maxReqPerSec)
-	return server
+	return &server
 }
 
 //Handle fetches all of the information from external APIs if not cached.
