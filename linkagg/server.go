@@ -11,11 +11,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-//Handler makes a request to the outside APIs
-type Handler interface {
-	Handle(w http.ResponseWriter, r *http.Request)
-}
-
 //Server implements the requester interface and calls out to external APIs.
 type Server struct {
 	cache        *Cache
