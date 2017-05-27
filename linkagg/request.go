@@ -41,6 +41,7 @@ func makeHackerNewsRequest(query string, config *viper.Viper, client *http.Clien
 	q.Set("hitsPerPage", "15")
 
 	json := makeRequest(req, client)
+	log.Println("Received request from Hacker News", json)
 	return parseJSONResponse(json, "hits", "title", "url")
 }
 
@@ -58,6 +59,7 @@ func makeStackOverflowRequest(query string, config *viper.Viper, client *http.Cl
 	q.Set("pagesize", "15")
 
 	json := makeRequest(req, client)
+	log.Println("Received request from Stack Overflow", json)
 	return parseJSONResponse(json, "items", "title", "link")
 }
 
@@ -73,6 +75,7 @@ func makeGithubRequest(query string, config *viper.Viper, client *http.Client) [
 	q.Set("per_page", "15")
 
 	json := makeRequest(req, client)
+	log.Println("Received request from Github", json)
 	return parseJSONResponse(json, "items", "name", "html_url")
 }
 
