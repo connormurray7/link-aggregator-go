@@ -29,8 +29,7 @@ func NewLinkAggCache(config *viper.Viper) *Cache {
 
 //Get fetches entry from Redis instance if it exists, else returns "".
 func (cache *Cache) Get(key string) string {
-	cache.redisConn.Send("GET", key)
-	val, _ := cache.redisConn.Receive()
+	val, _ := cache.redisConn.Do("GET", key)
 	if str, ok := val.(string); ok {
 		return str
 	}
