@@ -38,9 +38,10 @@ func makeHackerNewsRequest(query string, config *viper.Viper, client *http.Clien
 		return nil
 	}
 	q := req.URL.Query()
-	q.Set("query", query)
-	q.Set("tags", "story")
-	q.Set("hitsPerPage", "15")
+	q.Add("query", query)
+	q.Add("tags", "story")
+	q.Add("hitsPerPage", "15")
+	req.URL.RawQuery = q.Encode()
 
 	json := makeRequest(req, client)
 	log.Println("Received request from Hacker News", json)
@@ -54,12 +55,13 @@ func makeStackOverflowRequest(query string, config *viper.Viper, client *http.Cl
 		return nil
 	}
 	q := req.URL.Query()
-	q.Set("query", query)
-	q.Set("order", "desc")
-	q.Set("sort", "relevance")
-	q.Set("accepted", "True")
-	q.Set("site", "stackoverflow")
-	q.Set("pagesize", "15")
+	q.Add("query", query)
+	q.Add("order", "desc")
+	q.Add("sort", "relevance")
+	q.Add("accepted", "True")
+	q.Add("site", "stackoverflow")
+	q.Add("pagesize", "15")
+	req.URL.RawQuery = q.Encode()
 
 	json := makeRequest(req, client)
 	log.Println("Received request from Stack Overflow", json)
@@ -73,9 +75,10 @@ func makeGithubRequest(query string, config *viper.Viper, client *http.Client) [
 		return nil
 	}
 	q := req.URL.Query()
-	q.Set("q", query)
-	q.Set("sort", "stars")
-	q.Set("per_page", "15")
+	q.Add("q", query)
+	q.Add("sort", "stars")
+	q.Add("per_page", "15")
+	req.URL.RawQuery = q.Encode()
 
 	json := makeRequest(req, client)
 	log.Println("Received request from Github", json)
@@ -83,7 +86,7 @@ func makeGithubRequest(query string, config *viper.Viper, client *http.Client) [
 }
 
 func makeRequest(req *http.Request, client *http.Client) string {
-	reqStr, err := httputil.DumpRequest(req, false)
+	reqStr, err := httputil.DumpRequest(req, true)
 	if err != nil {
 		log.Println("Malformed request", req)
 	}
