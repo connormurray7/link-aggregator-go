@@ -42,7 +42,6 @@ func makeHackerNewsRequest(query string, config *viper.Viper, client *http.Clien
 	req.URL.RawQuery = q.Encode()
 
 	json := makeRequest(req, client)
-	log.Println("Received request from Hacker News", json)
 	return parseJSONResponse(json, "hits", "title", "url")
 }
 
@@ -62,7 +61,6 @@ func makeStackOverflowRequest(query string, config *viper.Viper, client *http.Cl
 	req.URL.RawQuery = q.Encode()
 
 	json := makeRequest(req, client)
-	log.Println("Received request from Stack Overflow", json)
 	return parseJSONResponse(json, "items", "title", "link")
 }
 
@@ -79,7 +77,6 @@ func makeGithubRequest(query string, config *viper.Viper, client *http.Client) [
 	req.URL.RawQuery = q.Encode()
 
 	json := makeRequest(req, client)
-	log.Println("Received request from Github", json)
 	return parseJSONResponse(json, "items", "name", "html_url")
 }
 
