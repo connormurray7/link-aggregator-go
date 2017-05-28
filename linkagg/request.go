@@ -54,6 +54,7 @@ func makeStackOverflowRequest(query string, config *viper.Viper, client *http.Cl
 	q := req.URL.Query()
 	q.Set("query", query)
 	q.Set("order", "desc")
+	q.Set("sort", "relevance")
 	q.Set("accepted", "True")
 	q.Set("site", "stackoverflow")
 	q.Set("pagesize", "15")
@@ -70,7 +71,7 @@ func makeGithubRequest(query string, config *viper.Viper, client *http.Client) [
 		return nil
 	}
 	q := req.URL.Query()
-	q.Set("query", query)
+	q.Set("q", query)
 	q.Set("sort", "stars")
 	q.Set("per_page", "15")
 
