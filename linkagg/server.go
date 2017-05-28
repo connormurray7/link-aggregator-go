@@ -48,7 +48,7 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	result := server.cache.Get(req)
 	if result == "" && !server.needRateLimit() {
 		log.Print("Request not cached, fetching from external APIs")
-		result := FetchExternalRequest(req, server.config, server.client)
+		result = FetchExternalRequest(req, server.config, server.client)
 		server.cache.Set(req, result)
 	}
 	log.Println("Sending back", result)
