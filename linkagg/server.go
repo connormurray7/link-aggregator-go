@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"github.com/spf13/viper"
+	"github.com/tidwall/gjson"
 )
 
 //Server implements the requester interface and calls out to external APIs.
@@ -41,7 +42,8 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Unable to parse request.", r)
 	}
-	req := string(arr)
+	jsonReq := string(arr)
+	req := gjson.Get(jsonReq, "term").String()
 	log.Println("Inbound request", req)
 	result := server.cache.Get(req)
 	if result == "" && !server.needRateLimit() {

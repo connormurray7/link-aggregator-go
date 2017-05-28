@@ -6,8 +6,6 @@ import (
 	"log"
 	"net/http"
 
-	"net/http/httputil"
-
 	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
 )
@@ -86,11 +84,7 @@ func makeGithubRequest(query string, config *viper.Viper, client *http.Client) [
 }
 
 func makeRequest(req *http.Request, client *http.Client) string {
-	reqStr, err := httputil.DumpRequest(req, true)
-	if err != nil {
-		log.Println("Malformed request", req)
-	}
-	log.Println("Making request", string(reqStr))
+	log.Println("Making request", req.URL.String())
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Print("Unable to complete request", err)
