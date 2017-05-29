@@ -102,8 +102,8 @@ func parseJSONResponse(json string, items string, title string, url string) []Me
 
 	for _, hit := range result.Array() {
 		record := hit.Map()
-		parsed[num] = Message{record[title].String(), record[url].String()}
+		parsed[num] = Message{record[title].Raw, record[url].Raw}
 		num++
 	}
-	return parsed[:num]
+	return parsed
 }
