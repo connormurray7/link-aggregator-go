@@ -18,7 +18,7 @@ type Message struct {
 
 //FetchExternalRequest calls all external apis and returns a json string of parsed responses.
 func FetchExternalRequest(query string, config *viper.Viper, client *http.Client) string {
-	m := make(map[string][]Message)
+	m := make(map[string]*[]Message)
 	m["Github"] = makeGithubRequest(query, config, client)
 	m["Hacker News"] = makeHackerNewsRequest(query, config, client)
 	m["Stack Overflow"] = makeStackOverflowRequest(query, config, client)
@@ -29,7 +29,7 @@ func FetchExternalRequest(query string, config *viper.Viper, client *http.Client
 	return string(result)
 }
 
-func makeHackerNewsRequest(query string, config *viper.Viper, client *http.Client) []Message {
+func makeHackerNewsRequest(query string, config *viper.Viper, client *http.Client) *[]Message {
 	req, err := http.NewRequest("GET", config.GetString("HackerNews.url"), nil)
 	if err != nil {
 		log.Print("Error creating new Hacker News request", err)
@@ -42,10 +42,11 @@ func makeHackerNewsRequest(query string, config *viper.Viper, client *http.Clien
 	req.URL.RawQuery = q.Encode()
 
 	json := makeRequest(req, client)
-	return parseJSONResponse(json, "hits", "title", "url")
+	p := parseJSONResponse(json, "hits", "title", "url")
+	return &p
 }
 
-func makeStackOverflowRequest(query string, config *viper.Viper, client *http.Client) []Message {
+func makeStackOverflowRequest(query string, config *viper.Viper, client *http.Client) *[]Message {
 	req, err := http.NewRequest("GET", config.GetString("StackOverflow.url"), nil)
 	if err != nil {
 		log.Print("Error creating new Stack Overflow request", err)
@@ -61,10 +62,11 @@ func makeStackOverflowRequest(query string, config *viper.Viper, client *http.Cl
 	req.URL.RawQuery = q.Encode()
 
 	json := makeRequest(req, client)
-	return parseJSONResponse(json, "items", "title", "link")
+	p := parseJSONResponse(json, "items", "title", "link")
+	return &p
 }
 
-func makeGithubRequest(query string, config *viper.Viper, client *http.Client) []Message {
+func makeGithubRequest(query string, config *viper.Viper, client *http.Client) *[]Message {
 	req, err := http.NewRequest("GET", config.GetString("Github.url"), nil)
 	if err != nil {
 		log.Print("Error creating new Github request", err)
@@ -77,7 +79,8 @@ func makeGithubRequest(query string, config *viper.Viper, client *http.Client) [
 	req.URL.RawQuery = q.Encode()
 
 	json := makeRequest(req, client)
-	return parseJSONResponse(json, "items", "name", "html_url")
+	p := parseJSONResponse(json, "items", "name", "html_url")
+	return &p
 }
 
 func makeRequest(req *http.Request, client *http.Client) string {
