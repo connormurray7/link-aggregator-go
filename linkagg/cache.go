@@ -22,7 +22,10 @@ type Cache struct {
 func NewLinkAggCache(config *viper.Viper) *Cache {
 	var c Cache
 	log.Println("Connecting to Redis instance on local port,", config.GetString("Redis.port"))
-	var conn, _ = redis.Dial("tcp", ":"+config.GetString("Redis.port"))
+	var conn, err = redis.Dial("tcp", ":"+config.GetString("Redis.port"))
+	if err != nil {
+		log.Println("Error dialing redis instance", err)
+	}
 	c.redisConn = conn
 	return &c
 }
