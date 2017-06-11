@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 
+	"fmt"
+
 	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
 )
@@ -43,7 +45,7 @@ func makeHackerNewsRequest(query string, config *viper.Viper, client *http.Clien
 
 	json := makeRequest(req, client)
 	p := parseJSONResponse(json, "hits", "title", "url")
-	return &p
+	return p
 }
 
 func makeStackOverflowRequest(query string, config *viper.Viper, client *http.Client) *[]Message {
@@ -63,7 +65,7 @@ func makeStackOverflowRequest(query string, config *viper.Viper, client *http.Cl
 
 	json := makeRequest(req, client)
 	p := parseJSONResponse(json, "items", "title", "link")
-	return &p
+	return p
 }
 
 func makeGithubRequest(query string, config *viper.Viper, client *http.Client) *[]Message {
@@ -80,7 +82,7 @@ func makeGithubRequest(query string, config *viper.Viper, client *http.Client) *
 
 	json := makeRequest(req, client)
 	p := parseJSONResponse(json, "items", "name", "html_url")
-	return &p
+	return p
 }
 
 func makeRequest(req *http.Request, client *http.Client) string {
@@ -98,15 +100,16 @@ func makeRequest(req *http.Request, client *http.Client) string {
 	return string(byteArr[:])
 }
 
-func parseJSONResponse(json string, items string, title string, url string) []Message {
+func parseJSONResponse(json string, items string, title string, url string) *[]Message {
 	result := gjson.Get(json, items)
 	parsed := make([]Message, 20)
 	num := 0
 
 	for _, hit := range result.Array() {
 		record := hit.Map()
-		parsed[num] = Message{record[title].Raw, record[url].Raw}
+		fmt.Println(record[title].Str, record[url].Str)
+		parsed[num] = Message{record[title].Str, record[url].Str}
 		num++
 	}
-	return parsed
+	return &parsed
 }
