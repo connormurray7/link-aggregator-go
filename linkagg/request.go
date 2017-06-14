@@ -14,8 +14,8 @@ import (
 
 //Message contains the information for every row in a response.
 type Message struct {
-	title string
-	link  string
+	Title string
+	Link  string
 }
 
 //FetchExternalRequest calls all external apis and returns a json string of parsed responses.
