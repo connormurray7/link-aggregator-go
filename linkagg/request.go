@@ -6,8 +6,6 @@ import (
 	"log"
 	"net/http"
 
-	"fmt"
-
 	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
 )
@@ -107,7 +105,6 @@ func parseJSONResponse(json string, items string, title string, url string) *[]M
 
 	for _, hit := range result.Array() {
 		record := hit.Map()
-		fmt.Println(record[title].Str, record[url].Str)
 		parsed[num] = Message{record[title].Str, record[url].Str}
 		num++
 	}

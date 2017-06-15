@@ -51,7 +51,6 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		result = FetchExternalRequest(req, server.config, server.client)
 		server.cache.Set(req, result)
 	}
-	log.Println("Sending back", result)
 	w.Write([]byte(result))
 }
 
