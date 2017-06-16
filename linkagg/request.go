@@ -16,6 +16,15 @@ type Message struct {
 	Link  string
 }
 
+type Requester interface {
+	MakeExternalRequest(url string, params []EncodingPair) string
+}
+
+type EncodingPair struct {
+	Key   string
+	Value string
+}
+
 //FetchExternalRequest calls all external apis and returns a json string of parsed responses.
 func FetchExternalRequest(query string, config *viper.Viper, client *http.Client) string {
 	m := make(map[string]*[]Message)
@@ -27,6 +36,22 @@ func FetchExternalRequest(query string, config *viper.Viper, client *http.Client
 		log.Print("Unable to encode response", err)
 	}
 	return string(result)
+}
+
+func MakeExternalRequest(url string, params []EncodingPair) string {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Print("Error creating new Github request", err)
+		return ""
+	}
+	q := req.URL.Query()
+	for _, param := range params {
+		q.Add(param.Key, param.Value)
+
+	}
+	req.URL.RawQuery = q.Encode()
+	json := makeRequest(req, client)
+	return json
 }
 
 func makeGithubRequest(query string, config *viper.Viper, client *http.Client) *[]Message {
