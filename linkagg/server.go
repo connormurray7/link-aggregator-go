@@ -14,9 +14,9 @@ import (
 
 //Server implements the requester interface and calls out to external APIs.
 type Server struct {
-	cache        *Cache
-	config       *viper.Viper
-	client       *http.Client
+	cache  *Cache
+	config *viper.Viper
+	// client       *http.Client
 	reqTimes     chan int64
 	maxReqPerSec int
 }
@@ -27,9 +27,9 @@ func NewServer(config *viper.Viper) *Server {
 
 	server.config = config
 	server.cache = NewLinkAggCache(config)
-	server.client = &http.Client{
-		Timeout: time.Second * 10,
-	}
+	// server.client = &http.Client{
+	// 	Timeout: time.Second * 10,
+	// }
 	server.maxReqPerSec = config.GetInt("ratelimit")
 	server.reqTimes = make(chan int64, server.maxReqPerSec)
 	return &server
@@ -48,7 +48,7 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	result := server.cache.Get(req)
 	if result == "" && !server.needRateLimit() {
 		log.Print("Request not cached, fetching from external APIs")
-		result = FetchExternalRequest(req, server.config, server.client)
+		result = FetchExternalRequest(req, server.config)
 		server.cache.Set(req, result)
 	}
 	w.Write([]byte(result))

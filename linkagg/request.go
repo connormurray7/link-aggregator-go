@@ -16,8 +16,15 @@ type Message struct {
 	Link  string
 }
 
-type Requester interface {
-	MakeExternalRequest(url string, params []EncodingPair) string
+// type Requester interface {
+// 	MakeExternalRequest(url string, params []EncodingPair, client *http.Client) string
+// }
+
+type ExternalApi struct {
+	params   []EncodingPair
+	queryKey string
+	url      string
+	client   *http.Client
 }
 
 type EncodingPair struct {
@@ -38,74 +45,21 @@ func FetchExternalRequest(query string, config *viper.Viper, client *http.Client
 	return string(result)
 }
 
-func MakeExternalRequest(url string, params []EncodingPair) string {
-	req, err := http.NewRequest("GET", url, nil)
+func (e *ExternalApi) MakeExternalRequest(query string) string {
+	req, err := http.NewRequest("GET", e.url, nil)
 	if err != nil {
 		log.Print("Error creating new Github request", err)
 		return ""
 	}
 	q := req.URL.Query()
-	for _, param := range params {
+	for _, param := range e.params {
 		q.Add(param.Key, param.Value)
 
 	}
+	q.Add(e.queryKey, query)
 	req.URL.RawQuery = q.Encode()
-	json := makeRequest(req, client)
+	json := makeRequest(req, e.client)
 	return json
-}
-
-func makeGithubRequest(query string, config *viper.Viper, client *http.Client) *[]Message {
-	req, err := http.NewRequest("GET", config.GetString("Github.url"), nil)
-	if err != nil {
-		log.Print("Error creating new Github request", err)
-		return nil
-	}
-	q := req.URL.Query()
-	q.Add("q", query)
-	q.Add("sort", "stars")
-	q.Add("per_page", "15")
-	req.URL.RawQuery = q.Encode()
-
-	json := makeRequest(req, client)
-	p := parseJSONResponse(json, "items", "name", "html_url")
-	return p
-}
-
-func makeHackerNewsRequest(query string, config *viper.Viper, client *http.Client) *[]Message {
-	req, err := http.NewRequest("GET", config.GetString("HackerNews.url"), nil)
-	if err != nil {
-		log.Print("Error creating new Hacker News request", err)
-		return nil
-	}
-	q := req.URL.Query()
-	q.Add("query", query)
-	q.Add("tags", "story")
-	q.Add("hitsPerPage", "15")
-	req.URL.RawQuery = q.Encode()
-
-	json := makeRequest(req, client)
-	p := parseJSONResponse(json, "hits", "title", "url")
-	return p
-}
-
-func makeStackOverflowRequest(query string, config *viper.Viper, client *http.Client) *[]Message {
-	req, err := http.NewRequest("GET", config.GetString("StackOverflow.url"), nil)
-	if err != nil {
-		log.Print("Error creating new Stack Overflow request", err)
-		return nil
-	}
-	q := req.URL.Query()
-	q.Add("query", query)
-	q.Add("order", "desc")
-	q.Add("sort", "relevance")
-	q.Add("accepted", "True")
-	q.Add("site", "stackoverflow")
-	q.Add("pagesize", "15")
-	req.URL.RawQuery = q.Encode()
-
-	json := makeRequest(req, client)
-	p := parseJSONResponse(json, "items", "title", "link")
-	return p
 }
 
 func makeRequest(req *http.Request, client *http.Client) string {
