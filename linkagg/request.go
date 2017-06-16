@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
 )
 
@@ -16,28 +15,40 @@ type Message struct {
 	Link  string
 }
 
-// type Requester interface {
-// 	MakeExternalRequest(url string, params []EncodingPair, client *http.Client) string
-// }
-
-type ExternalApi struct {
-	params   []EncodingPair
-	queryKey string
-	url      string
-	client   *http.Client
-}
-
 type EncodingPair struct {
 	Key   string
 	Value string
 }
 
+type ParsingParams struct {
+	items string
+	title string
+	url   string
+}
+
+type Requester interface {
+	FetchExternalRequest(query string) string
+}
+
+type RequestService struct {
+	apis []ExternalApi
+}
+
+type ExternalApi struct {
+	name     string
+	params   []EncodingPair
+	queryKey string
+	url      string
+	parsing  ParsingParams
+	client   *http.Client
+}
+
 //FetchExternalRequest calls all external apis and returns a json string of parsed responses.
-func FetchExternalRequest(query string, config *viper.Viper, client *http.Client) string {
+func (r *RequestService) FetchExternalRequest(query string) string {
 	m := make(map[string]*[]Message)
-	m["Github"] = makeGithubRequest(query, config, client)
-	m["Hacker News"] = makeHackerNewsRequest(query, config, client)
-	m["Stack Overflow"] = makeStackOverflowRequest(query, config, client)
+	for _, api := range r.apis {
+		m[api.name] = api.makeExternalRequest(query)
+	}
 	result, err := json.Marshal(m)
 	if err != nil {
 		log.Print("Unable to encode response", err)
@@ -45,11 +56,11 @@ func FetchExternalRequest(query string, config *viper.Viper, client *http.Client
 	return string(result)
 }
 
-func (e *ExternalApi) MakeExternalRequest(query string) string {
+func (e *ExternalApi) makeExternalRequest(query string) *[]Message {
 	req, err := http.NewRequest("GET", e.url, nil)
 	if err != nil {
 		log.Print("Error creating new Github request", err)
-		return ""
+		return nil
 	}
 	q := req.URL.Query()
 	for _, param := range e.params {
@@ -59,7 +70,7 @@ func (e *ExternalApi) MakeExternalRequest(query string) string {
 	q.Add(e.queryKey, query)
 	req.URL.RawQuery = q.Encode()
 	json := makeRequest(req, e.client)
-	return json
+	return parseJSONResponse(json, e.parsing)
 }
 
 func makeRequest(req *http.Request, client *http.Client) string {
@@ -77,14 +88,14 @@ func makeRequest(req *http.Request, client *http.Client) string {
 	return string(byteArr[:])
 }
 
-func parseJSONResponse(json string, items string, title string, url string) *[]Message {
-	result := gjson.Get(json, items)
+func parseJSONResponse(json string, params ParsingParams) *[]Message {
+	result := gjson.Get(json, params.items)
 	parsed := make([]Message, 20)
 	num := 0
 
 	for _, hit := range result.Array() {
 		record := hit.Map()
-		parsed[num] = Message{record[title].Str, record[url].Str}
+		parsed[num] = Message{record[params.title].Str, record[params.url].Str}
 		num++
 	}
 	return &parsed
