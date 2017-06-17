@@ -43,6 +43,19 @@ func NewGithubApi(config *viper.Viper) *ExternalApi {
 func NewHackerNewsApi(config *viper.Viper) *ExternalApi {
 	var e ExternalApi
 
+	e.name = "Hacker News"
+	e.url = config.GetString("HackerNews.url")
+	e.queryKey = "query"
+	e.params = []EncodingPair{
+		EncodingPair{"tags", "story"},
+		EncodingPair{"hitsPerPage", "15"},
+	}
+	e.parsing = ParsingParams{
+		items: "hits",
+		title: "title",
+		url:   "url",
+	}
+
 	return &e
 }
 
