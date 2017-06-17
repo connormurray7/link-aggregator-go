@@ -5,7 +5,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
 )
 
@@ -18,10 +20,12 @@ type RequestService struct {
 	client *http.Client
 }
 
-//Message contains the information for every row in a response.
-type Message struct {
-	Title string
-	Link  string
+type ExternalApi struct {
+	name     string
+	params   []EncodingPair
+	queryKey string
+	url      string
+	parsing  ParsingParams
 }
 
 type EncodingPair struct {
@@ -35,12 +39,20 @@ type ParsingParams struct {
 	url   string
 }
 
-type ExternalApi struct {
-	name     string
-	params   []EncodingPair
-	queryKey string
-	url      string
-	parsing  ParsingParams
+//Message contains the information for every row in a response.
+type Message struct {
+	Title string
+	Link  string
+}
+
+func NewRequestService(config *viper.Viper) *RequestService {
+	var r RequestService
+
+	r.apis = []ExternalApi{NewGithubApi(), NewHackerNewsApi(), NewStackOverflowApi()}
+	r.client = &http.Client{
+		Timeout: time.Second * 10,
+	}
+	return &r
 }
 
 //FetchExternalRequest calls all external apis and returns a json string of parsed responses.

@@ -14,11 +14,11 @@ import (
 
 //Server implements the requester interface and calls out to external APIs.
 type Server struct {
-	cache  *Cache
-	config *viper.Viper
-	// client       *http.Client
+	cache        *Cache
+	config       *viper.Viper
 	reqTimes     chan int64
 	maxReqPerSec int
+	service      *RequestService
 }
 
 //NewServer constructs a new link agg server given a config file.
@@ -29,6 +29,8 @@ func NewServer(config *viper.Viper) *Server {
 	server.cache = NewLinkAggCache(config)
 	server.maxReqPerSec = config.GetInt("ratelimit")
 	server.reqTimes = make(chan int64, server.maxReqPerSec)
+	server.service = NewRequestService(config)
+
 	return &server
 }
 
@@ -45,7 +47,7 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	result := server.cache.Get(req)
 	if result == "" && !server.needRateLimit() {
 		log.Print("Request not cached, fetching from external APIs")
-		result = FetchExternalRequest(req, server.config)
+		result = server.service.FetchExternalRequest(req)
 		server.cache.Set(req, result)
 	}
 	w.Write([]byte(result))
