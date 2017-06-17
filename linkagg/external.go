@@ -36,7 +36,6 @@ func NewGithubApi(config *viper.Viper) *ExternalApi {
 		title: "name",
 		url:   "html_url",
 	}
-
 	return &e
 }
 
@@ -55,12 +54,26 @@ func NewHackerNewsApi(config *viper.Viper) *ExternalApi {
 		title: "title",
 		url:   "url",
 	}
-
 	return &e
 }
 
 func NewStackOverflowApi(config *viper.Viper) *ExternalApi {
 	var e ExternalApi
 
+	e.name = "Stack Overflow"
+	e.url = config.GetString("StackOverflow.url")
+	e.queryKey = "query"
+	e.params = []EncodingPair{
+		EncodingPair{"order", "desc"},
+		EncodingPair{"sort", "relevance"},
+		EncodingPair{"accepted", "True"},
+		EncodingPair{"site", "stackoverflow"},
+		EncodingPair{"pagesize", "15"},
+	}
+	e.parsing = ParsingParams{
+		items: "items",
+		title: "title",
+		url:   "link",
+	}
 	return &e
 }
