@@ -27,9 +27,6 @@ func NewServer(config *viper.Viper) *Server {
 
 	server.config = config
 	server.cache = NewLinkAggCache(config)
-	// server.client = &http.Client{
-	// 	Timeout: time.Second * 10,
-	// }
 	server.maxReqPerSec = config.GetInt("ratelimit")
 	server.reqTimes = make(chan int64, server.maxReqPerSec)
 	return &server

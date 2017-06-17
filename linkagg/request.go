@@ -9,6 +9,15 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+type Requester interface {
+	FetchExternalRequest(query string) string
+}
+
+type RequestService struct {
+	apis   []ExternalApi
+	client *http.Client
+}
+
 //Message contains the information for every row in a response.
 type Message struct {
 	Title string
@@ -26,28 +35,19 @@ type ParsingParams struct {
 	url   string
 }
 
-type Requester interface {
-	FetchExternalRequest(query string) string
-}
-
-type RequestService struct {
-	apis []ExternalApi
-}
-
 type ExternalApi struct {
 	name     string
 	params   []EncodingPair
 	queryKey string
 	url      string
 	parsing  ParsingParams
-	client   *http.Client
 }
 
 //FetchExternalRequest calls all external apis and returns a json string of parsed responses.
 func (r *RequestService) FetchExternalRequest(query string) string {
 	m := make(map[string]*[]Message)
 	for _, api := range r.apis {
-		m[api.name] = api.makeExternalRequest(query)
+		m[api.name] = api.makeExternalRequest(query, r.client)
 	}
 	result, err := json.Marshal(m)
 	if err != nil {
@@ -56,7 +56,7 @@ func (r *RequestService) FetchExternalRequest(query string) string {
 	return string(result)
 }
 
-func (e *ExternalApi) makeExternalRequest(query string) *[]Message {
+func (e *ExternalApi) makeExternalRequest(query string, client *http.Client) *[]Message {
 	req, err := http.NewRequest("GET", e.url, nil)
 	if err != nil {
 		log.Print("Error creating new Github request", err)
@@ -69,7 +69,7 @@ func (e *ExternalApi) makeExternalRequest(query string) *[]Message {
 	}
 	q.Add(e.queryKey, query)
 	req.URL.RawQuery = q.Encode()
-	json := makeRequest(req, e.client)
+	json := makeRequest(req, client)
 	return parseJSONResponse(json, e.parsing)
 }
 
