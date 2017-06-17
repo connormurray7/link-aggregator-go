@@ -12,7 +12,7 @@ import (
 )
 
 type Requester interface {
-	FetchExternalRequest(query string) string
+	Request(query string) string
 }
 
 type RequestService struct {
@@ -40,8 +40,8 @@ func NewRequestService(config *viper.Viper) *RequestService {
 	return &r
 }
 
-//FetchExternalRequest calls all external apis and returns a json string of parsed responses.
-func (r *RequestService) FetchExternalRequest(query string) string {
+//Request calls all external apis and returns a json string of parsed responses.
+func (r *RequestService) Request(query string) string {
 	m := make(map[string]*[]Message)
 	for _, api := range r.apis {
 		m[api.name] = api.makeExternalRequest(query, r.client)
@@ -56,7 +56,7 @@ func (r *RequestService) FetchExternalRequest(query string) string {
 func (e *ExternalApi) makeExternalRequest(query string, client *http.Client) *[]Message {
 	req, err := http.NewRequest("GET", e.url, nil)
 	if err != nil {
-		log.Print("Error creating new Github request", err)
+		log.Print("Error creating new request", err)
 		return nil
 	}
 	q := req.URL.Query()
@@ -66,11 +66,11 @@ func (e *ExternalApi) makeExternalRequest(query string, client *http.Client) *[]
 	}
 	q.Add(e.queryKey, query)
 	req.URL.RawQuery = q.Encode()
-	json := makeRequest(req, client)
+	json := executeRequest(req, client)
 	return parseJSONResponse(json, e.parsing)
 }
 
-func makeRequest(req *http.Request, client *http.Client) string {
+func executeRequest(req *http.Request, client *http.Client) string {
 	log.Println("Making request", req.URL.String())
 	resp, err := client.Do(req)
 	if err != nil {
