@@ -16,27 +16,8 @@ type Requester interface {
 }
 
 type RequestService struct {
-	apis   []ExternalApi
+	apis   []*ExternalApi
 	client *http.Client
-}
-
-type ExternalApi struct {
-	name     string
-	params   []EncodingPair
-	queryKey string
-	url      string
-	parsing  ParsingParams
-}
-
-type EncodingPair struct {
-	Key   string
-	Value string
-}
-
-type ParsingParams struct {
-	items string
-	title string
-	url   string
 }
 
 //Message contains the information for every row in a response.
@@ -48,7 +29,11 @@ type Message struct {
 func NewRequestService(config *viper.Viper) *RequestService {
 	var r RequestService
 
-	r.apis = []ExternalApi{NewGithubApi(), NewHackerNewsApi(), NewStackOverflowApi()}
+	r.apis = []*ExternalApi{
+		NewGithubApi(config),
+		NewHackerNewsApi(config),
+		NewStackOverflowApi(config),
+	}
 	r.client = &http.Client{
 		Timeout: time.Second * 10,
 	}
