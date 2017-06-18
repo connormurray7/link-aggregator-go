@@ -11,10 +11,12 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+//Requester accepts a string query and returns an answer.
 type Requester interface {
 	Request(query string) string
 }
 
+//RequestService makes http requests to list of external APIs.
 type RequestService struct {
 	apis   []*ExternalApi
 	client *http.Client
@@ -26,6 +28,7 @@ type Message struct {
 	Link  string
 }
 
+//NewRequestService requires Viper config for API information.
 func NewRequestService(config *viper.Viper) *RequestService {
 	var r RequestService
 
