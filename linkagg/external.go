@@ -2,34 +2,38 @@ package linkagg
 
 import "github.com/spf13/viper"
 
-type ExternalApi struct {
+//ExternalAPI contains all specific info to 3rd party APIs.
+type ExternalAPI struct {
 	name     string
 	queryKey string
 	url      string
-	params   []EncodingPair
+	params   []URLParam
 	parsing  ParsingParams
 }
 
-type EncodingPair struct {
+//URLParam is a key value pair.
+type URLParam struct {
 	Key   string
 	Value string
 }
 
+//ParsingParams contains the names of keys in JSON response.
 type ParsingParams struct {
 	items string
 	title string
 	url   string
 }
 
-func NewGithubApi(config *viper.Viper) *ExternalApi {
-	var e ExternalApi
+//NewGithubApi requires a config to for the url.
+func NewGithubAPI(config *viper.Viper) *ExternalAPI {
+	var e ExternalAPI
 
 	e.name = "Github"
 	e.url = config.GetString("Github.url")
 	e.queryKey = "q"
-	e.params = []EncodingPair{
-		EncodingPair{"sort", "stars"},
-		EncodingPair{"per_page", "15"},
+	e.params = []URLParam{
+		URLParam{"sort", "stars"},
+		URLParam{"per_page", "15"},
 	}
 	e.parsing = ParsingParams{
 		items: "items",
@@ -39,15 +43,16 @@ func NewGithubApi(config *viper.Viper) *ExternalApi {
 	return &e
 }
 
-func NewHackerNewsApi(config *viper.Viper) *ExternalApi {
-	var e ExternalApi
+//NewHackerNewsAPI requires a config to for the url.
+func NewHackerNewsAPI(config *viper.Viper) *ExternalAPI {
+	var e ExternalAPI
 
 	e.name = "Hacker News"
 	e.url = config.GetString("HackerNews.url")
 	e.queryKey = "query"
-	e.params = []EncodingPair{
-		EncodingPair{"tags", "story"},
-		EncodingPair{"hitsPerPage", "15"},
+	e.params = []URLParam{
+		URLParam{"tags", "story"},
+		URLParam{"hitsPerPage", "15"},
 	}
 	e.parsing = ParsingParams{
 		items: "hits",
@@ -57,18 +62,19 @@ func NewHackerNewsApi(config *viper.Viper) *ExternalApi {
 	return &e
 }
 
-func NewStackOverflowApi(config *viper.Viper) *ExternalApi {
-	var e ExternalApi
+//NewStackOverflowAPI requires a config to for the url.
+func NewStackOverflowAPI(config *viper.Viper) *ExternalAPI {
+	var e ExternalAPI
 
 	e.name = "Stack Overflow"
 	e.url = config.GetString("StackOverflow.url")
 	e.queryKey = "query"
-	e.params = []EncodingPair{
-		EncodingPair{"order", "desc"},
-		EncodingPair{"sort", "relevance"},
-		EncodingPair{"accepted", "True"},
-		EncodingPair{"site", "stackoverflow"},
-		EncodingPair{"pagesize", "15"},
+	e.params = []URLParam{
+		URLParam{"order", "desc"},
+		URLParam{"sort", "relevance"},
+		URLParam{"accepted", "True"},
+		URLParam{"site", "stackoverflow"},
+		URLParam{"pagesize", "15"},
 	}
 	e.parsing = ParsingParams{
 		items: "items",

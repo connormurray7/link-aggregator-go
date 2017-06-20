@@ -18,7 +18,7 @@ type Requester interface {
 
 //RequestService makes http requests to list of external APIs.
 type RequestService struct {
-	apis   []*ExternalApi
+	apis   []*ExternalAPI
 	client *http.Client
 }
 
@@ -32,10 +32,10 @@ type Message struct {
 func NewRequestService(config *viper.Viper) *RequestService {
 	var r RequestService
 
-	r.apis = []*ExternalApi{
-		NewGithubApi(config),
-		NewHackerNewsApi(config),
-		NewStackOverflowApi(config),
+	r.apis = []*ExternalAPI{
+		NewGithubAPI(config),
+		NewHackerNewsAPI(config),
+		NewStackOverflowAPI(config),
 	}
 	r.client = &http.Client{
 		Timeout: time.Second * 10,
@@ -56,7 +56,7 @@ func (r *RequestService) Request(query string) string {
 	return string(result)
 }
 
-func (e *ExternalApi) makeExternalRequest(query string, client *http.Client) *[]Message {
+func (e *ExternalAPI) makeExternalRequest(query string, client *http.Client) *[]Message {
 	req, err := http.NewRequest("GET", e.url, nil)
 	if err != nil {
 		log.Print("Error creating new request", err)
